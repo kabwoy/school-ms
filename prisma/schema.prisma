@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model students{
+  id Int @id @unique @default(autoincrement())
+  first_name String
+  last_name String
+  gender Gender @default(MALE)
+  dob DateTime
+  parent parents @relation(fields: [parentId] , references: [id], onDelete: Cascade , onUpdate: Cascade)
+  parentId Int
+  result results[]
+  classrooms classrooms @relation(fields: [classId] , references: [id])
+  classId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model parents{
+  id Int @id @unique @default(autoincrement())
+  first_name String
+  last_name String
+  contact String
+  address String
+  gender Gender @default(MALE)
+  id_number String
+  students students[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model subjects{
+  id Int @unique @default(autoincrement())
+  subject_name String
+  results results[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model exams{
+  id Int @unique @default(autoincrement())
+  exam_type String
+  date DateTime @db.Date @default(now())
+  results results[]
+  term terms @relation(fields: [termId] , references: [id] , onUpdate: Cascade , onDelete: Cascade)
+  termId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model results{
+  id Int @unique @default(autoincrement())
+  subject subjects @relation(fields: [subjectId] , references: [id])
+  subjectId Int
+  exam exams @relation(fields: [examId] , references: [id] , onUpdate: Cascade , onDelete: Cascade)
+  student students @relation(fields: [studentId] , references: [id], onUpdate: Cascade , onDelete: Cascade)
+  studentId Int
+  examId Int
+  marks Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model classrooms{
+  id Int @unique @default(autoincrement())
+  classroom_name String
+  teacher teachers @relation(fields: [teacherId] , references: [id])
+  teacherId Int
+  student students[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model terms{
+  id Int @unique @default(autoincrement())
+  term_name String
+  exam exams[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model teachers{
+  id Int @id @unique @default(autoincrement())
+  first_name String
+  last_name String
+  contact String
+  address String
+  gender Gender @default(MALE)
+  id_number String
+  email String @unique
+  password String
+  classroom classrooms[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model users{
+  id Int @id @unique @default(autoincrement())
+  email String @unique
+  password String
+  role Roles @default(TEACHER)
+}
+// model classroom_students{
+//   student students @relation(fields: [studentId] , references: [id])
+//   studentId Int
+//   classroom classrooms @relation(fields: [classId] , references: [id])
+//   classId Int
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+enum Gender{
+  MALE
+  FEMALE
+}
+enum Roles{
+  ADMIN
+  TEACHER
+}
